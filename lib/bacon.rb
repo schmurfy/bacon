@@ -23,7 +23,7 @@ module Bacon
   def self.run_file(path)
     # clear previous counters
     Counter.clear
-    ErrorLog = ""
+    ErrorLog.clear
     # run test
     load(path)
     handle_summary
