@@ -22,11 +22,11 @@ module Bacon
   
   def self.run_file(path)
     # clear previous counters
-    Counter.clear
-    ErrorLog.clear
+    # Counter.clear
+    # ErrorLog.clear
     # run test
     load(path)
-    handle_summary
+    # handle_summary
     Counter
   end
   
