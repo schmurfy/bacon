@@ -1,5 +1,4 @@
 # Rakefile for Bacon.  -*-ruby-*-
-require 'rake/rdoctask'
 require 'rake/testtask'
 
 
@@ -85,7 +84,6 @@ begin
   require 'rake'
   require 'rake/clean'
   require 'rake/packagetask'
-  require 'rake/gempackagetask'
   require 'fileutils'
 rescue LoadError
   # Too bad.
@@ -107,7 +105,6 @@ http://github.com/chneukirchen/bacon
     s.bindir          = 'bin'
     s.executables     << 'bacon'
     s.require_path    = 'lib'
-    s.has_rdoc        = true
     s.extra_rdoc_files = ['README', 'RDOX']
     s.test_files      = []
 
@@ -117,24 +114,6 @@ http://github.com/chneukirchen/bacon
   end
 
   task :gem => [:chmod, :changelog]
-
-  Rake::GemPackageTask.new(spec) do |p|
-    p.gem_spec = spec
-    p.need_tar = false
-    p.need_zip = false
-  end
 end
 
-desc "Generate RDoc documentation"
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.options << '--line-numbers' << '--inline-source' <<
-    '--main' << 'README' <<
-    '--title' << 'Bacon Documentation' <<
-    '--charset' << 'utf-8'
-  rdoc.rdoc_dir = "doc"
-  rdoc.rdoc_files.include 'README'
-  rdoc.rdoc_files.include 'COPYING'
-  rdoc.rdoc_files.include 'RDOX'
-  rdoc.rdoc_files.include('lib/bacon.rb')
-end
-task :rdoc => ["RDOX"]
+
