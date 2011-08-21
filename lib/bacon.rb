@@ -19,7 +19,17 @@ module Bacon
   RestrictContext = //  unless defined? RestrictContext
 
   Backtraces = true  unless defined? Backtraces
-
+  
+  def self.run_file(path)
+    # clear previous counters
+    Counter.clear
+    ErrorLog = ""
+    # run test
+    load(path)
+    handle_summary
+    Counter
+  end
+  
   def self.summary_on_exit
     return  if Counter[:installed_summary] > 0
     @timer = Time.now
