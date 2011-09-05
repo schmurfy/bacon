@@ -203,7 +203,7 @@ module Bacon
           end
         rescue Object => e
           ErrorLog << "#{e.class}: #{e.message}\n"
-          e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ }.
+          e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }.
             each_with_index { |line, i|
             ErrorLog << "\t#{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
           }
