@@ -2,7 +2,7 @@
 require File.expand_path('../lib/bacon/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name            = "bacon"
+  s.name            = "schmurfy-bacon"
   s.version         = Bacon::VERSION
   s.platform        = Gem::Platform::RUBY
   s.summary         = "a small RSpec clone"
