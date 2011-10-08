@@ -28,6 +28,16 @@ module Bacon
   # default output
   extend BetterOutput
   
+  @backtrace_size = nil
+  
+  def self.backtrace_size=(n)
+    @backtrace_size = n
+  end
+  
+  def self.backtrace_size
+    @backtrace_size
+  end
+  
   def self.run_file(path)
     # clear previous counters
     # Counter.clear
@@ -126,10 +136,14 @@ module Bacon
           end
         rescue Object => e
           ErrorLog << "#{e.class}: #{e.message}\n"
-          e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }.
-            each_with_index { |line, i|
-            ErrorLog << "\t#{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
-          }
+          
+          backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
+          backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
+          
+          backtrace.each_with_index do |line, i|
+            ErrorLog << "  #{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
+          end
+          
           ErrorLog << "\n"
 
           if e.kind_of? Error
