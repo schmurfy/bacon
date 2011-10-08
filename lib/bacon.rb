@@ -25,6 +25,9 @@ module Bacon
     eval( File.read(path), nil, path )
   end
   
+  # default output
+  extend BetterOutput
+  
   def self.run_file(path)
     # clear previous counters
     # Counter.clear
@@ -49,9 +52,6 @@ module Bacon
     Counter[:installed_summary] += 1
   end
   class <<self; alias summary_at_exit summary_on_exit; end
-
-
-  extend SpecDoxOutput          # default
 
   class Error < RuntimeError
     attr_accessor :count_as
@@ -135,9 +135,10 @@ module Bacon
           if e.kind_of? Error
             Counter[e.count_as] += 1
             e.count_as.to_s.upcase
+            [:failed]
           else
             Counter[:errors] += 1
-            "ERROR: #{e.class}"
+            [:error, e]
           end
         else
           ""

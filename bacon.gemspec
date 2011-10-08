@@ -20,7 +20,10 @@ http://github.com/chneukirchen/bacon
   s.require_path    = 'lib'
   s.extra_rdoc_files = ['README']
   s.test_files      = []
-
+  
+  s.add_dependency 'term-ansicolor'
+  
+  
   s.author          = 'Christian Neukirchen'
   s.email           = 'chneukirchen@gmail.com'
   s.homepage        = 'http://github.com/chneukirchen/bacon'
