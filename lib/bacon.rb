@@ -20,6 +20,11 @@ module Bacon
 
   Backtraces = true  unless defined? Backtraces
   
+  
+  Dir[File.expand_path('../output/*_output.rb', __FILE__)].each do |path|
+    eval( File.read(path), nil, path )
+  end
+  
   def self.run_file(path)
     # clear previous counters
     # Counter.clear
@@ -45,88 +50,6 @@ module Bacon
   end
   class <<self; alias summary_at_exit summary_on_exit; end
 
-  module SpecDoxOutput
-    def handle_specification(name)
-      puts spaces + name
-      yield
-      puts if Counter[:context_depth] == 1
-    end
-
-    def handle_requirement(description)
-      print "#{spaces}  - #{description}"
-      error = yield
-      puts error.empty? ? "" : " [#{error}]"
-    end
-
-    def handle_summary
-      print ErrorLog  if Backtraces
-      puts "%d specifications (%d requirements), %d failures, %d errors" %
-        Counter.values_at(:specifications, :requirements, :failed, :errors)
-    end
-
-    def spaces
-      "  " * (Counter[:context_depth] - 1)
-    end
-  end
-
-  module TestUnitOutput
-    def handle_specification(name)  yield  end
-
-    def handle_requirement(description)
-      error = yield
-      if error.empty?
-        print "."
-      else
-        print error[0..0]
-      end
-    end
-
-    def handle_summary
-      puts "", "Finished in #{Time.now - @timer} seconds."
-      puts ErrorLog  if Backtraces
-      puts "%d tests, %d assertions, %d failures, %d errors" %
-        Counter.values_at(:specifications, :requirements, :failed, :errors)
-    end
-  end
-
-  module TapOutput
-    def handle_specification(name)  yield  end
-
-    def handle_requirement(description)
-      ErrorLog.replace ""
-      error = yield
-      if error.empty?
-        puts "ok %-3d - %s" % [Counter[:specifications], description]
-      else
-        puts "not ok %d - %s: %s" %
-          [Counter[:specifications], description, error]
-        puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
-      end
-    end
-
-    def handle_summary
-      puts "1..#{Counter[:specifications]}"
-      puts "# %d tests, %d assertions, %d failures, %d errors" %
-        Counter.values_at(:specifications, :requirements, :failed, :errors)
-    end
-  end
-
-  module KnockOutput
-    def handle_specification(name)  yield  end
-
-    def handle_requirement(description)
-      ErrorLog.replace ""
-      error = yield
-      if error.empty?
-        puts "ok - %s" % [description]
-      else
-        puts "not ok - %s: %s" % [description, error]
-        puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
-      end
-    end
-
-    def handle_summary;  end
-  end
 
   extend SpecDoxOutput          # default
 
