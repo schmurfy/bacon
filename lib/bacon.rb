@@ -24,8 +24,12 @@ module Bacon
     eval( File.read(path), nil, path )
   end
   
-  # default output
-  extend BetterOutput
+  # default output ()
+  if ENV['TERM']
+    extend BetterOutput
+  else
+    extend SpecDoxOutput
+  end
   
   @backtrace_size = nil
   
