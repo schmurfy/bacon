@@ -5,7 +5,7 @@ Color = Term::ANSIColor
 
 module BetterOutput
   def handle_specification(name)
-    puts "\n#{spaces('-')}#{Color.underscore}#{name}#{Color.reset}"
+    puts "\n#{spaces()}#{Color.underscore}#{name}#{Color.reset}"
     yield
     puts if Counter[:context_depth] == 1
   end
