@@ -1,5 +1,5 @@
 # Rakefile for Bacon.  -*-ruby-*-
-require 'rake/testtask'
+require "bundler/gem_tasks"
 
 
 desc "Run all the tests"
