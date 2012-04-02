@@ -13,13 +13,13 @@ module Bacon
     end
   end
   
-  class Context
-    include Mocha::API
+  module MochaSpec
+    def self.included(base)
+      base.send(:include, Mocha::API)
+    end
     
-    alias_method :it_before_mocha, :it
-    
-    def it(description, &block)
-      it_before_mocha(description) do
+    def execute_spec(&block)
+      super do
         begin
           mocha_setup
           block.call
@@ -31,5 +31,8 @@ module Bacon
         end
       end
     end
+    
   end
+  
+  Context.send(:include, MochaSpec)
 end
