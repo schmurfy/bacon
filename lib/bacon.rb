@@ -14,9 +14,6 @@ module Bacon
     raise NameError, "no such context: #{name.inspect}"
   }
 
-  RestrictName    = //  unless defined? RestrictName
-  RestrictContext = //  unless defined? RestrictContext
-
   Backtraces = true  unless defined? Backtraces
   
   
@@ -30,6 +27,18 @@ module Bacon
   else
     extend SpecDoxOutput
   end
+  
+  # focus ----
+  @allow_focused_run = true
+  
+  class <<self
+    attr_accessor :allow_focused_run
+    alias_method :allow_focused_run?, :allow_focused_run
+    
+    attr_accessor :focus_name_regexp, :focus_context_regexp
+  end
+  
+  # ------
   
   @backtrace_size = nil
   
@@ -100,7 +109,6 @@ module Bacon
     end
     
     def run
-      return  unless name =~ RestrictContext
       Counter[:context_depth] += 1
       Bacon.handle_specification(name) { instance_eval(&block) }
       Counter[:context_depth] -= 1
@@ -122,8 +130,20 @@ module Bacon
       end
     end
     
+    
+    def focus(spec_str)
+      raise "focused test forbidden" unless Bacon::allow_focused_run?
+      Bacon::focus_name_regexp = %r{#{spec_str}}
+    end
+    
+    def focus_context(context_str)
+      raise "focused test forbidden" unless Bacon::allow_focused_run?
+      Bacon::focus_context_regexp = %r{#{context_str}}
+    end
+    
     def it(description, &block)
-      return  unless description =~ RestrictName
+      return unless name =~ Bacon::focus_context_regexp
+      return  unless description =~ Bacon::focus_name_regexp
       block ||= lambda { should.flunk "not implemented" }
       Counter[:specifications] += 1
       run_requirement description, block
@@ -242,7 +262,12 @@ end
 
 module Kernel
   private
-  def describe(*args, &block) Bacon::Context.new(args.join(' '), &block).run  end
+  def describe(*args, &block)
+    Bacon::focus_name_regexp = //
+    Bacon::focus_context_regexp = //
+    Bacon::Context.new(args.join(' '), &block).run
+  end
+  
   def shared(name, &block)    Bacon::Shared[name] = block                     end
 end
 
