@@ -73,11 +73,8 @@ module Bacon
   end
   
   module ContextAssertions
-    def it(description, &block)
-      return  unless description =~ RestrictName
-      block ||= lambda { should.flunk "not implemented" }
-      Counter[:specifications] += 1
-      run_requirement description, block
+    def execute_spec(&block)
+      block.call
     end
     
     def describe(*args, &block)
@@ -124,6 +121,13 @@ module Bacon
         super(*args,&block)
       end
     end
+    
+    def it(description, &block)
+      return  unless description =~ RestrictName
+      block ||= lambda { should.flunk "not implemented" }
+      Counter[:specifications] += 1
+      run_requirement description, block
+    end
 
     def run_requirement(description, spec)
       Bacon.handle_requirement description do
@@ -131,9 +135,13 @@ module Bacon
           Counter[:depth] += 1
           rescued = false
           begin
-            @before.each { |block| instance_eval(&block) }
-            prev_req = Counter[:requirements]
-            instance_eval(&spec)
+            prev_req = nil
+            
+            execute_spec do
+              @before.each { |block| instance_eval(&block) }
+              prev_req = Counter[:requirements]
+              instance_eval(&spec)
+            end
           rescue Object => e
             rescued = true
             raise e
