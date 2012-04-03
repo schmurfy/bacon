@@ -86,6 +86,60 @@ module Bacon
       block.call
     end
     
+    def run_requirement(description, spec)
+      Bacon.handle_requirement description do
+        begin
+          Counter[:depth] += 1
+          rescued = false
+          begin
+            prev_req = nil
+            
+            execute_spec do
+              @before.each { |block| instance_eval(&block) }
+              prev_req = Counter[:requirements]
+              instance_eval(&spec)
+            end
+          rescue Object => e
+            rescued = true
+            raise e
+          ensure
+            if Counter[:requirements] == prev_req and not rescued
+              raise Error.new(:missing, "empty specification: #{@name} #{description}")
+            end
+            begin
+              @after.each { |block| instance_eval(&block) }
+            rescue Object => e
+              raise e  unless rescued
+            end
+          end
+        rescue Object => e
+          ErrorLog << "#{e.class}: #{e.message}\n"
+          
+          backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
+          backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
+          
+          backtrace.each_with_index do |line, i|
+            ErrorLog << "  #{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
+          end
+          
+          ErrorLog << "\n"
+
+          if e.kind_of? Error
+            Counter[e.count_as] += 1
+            e.count_as.to_s.upcase
+            [:failed]
+          else
+            Counter[:errors] += 1
+            [:error, e]
+          end
+        else
+          ""
+        ensure
+          Counter[:depth] -= 1
+        end
+      end
+    end
+    
     def describe(*args, &block)
       context = Bacon::Context.new(args.join(' '), &block)
       (parent_context = self).methods(false).each {|e|
@@ -147,61 +201,6 @@ module Bacon
       block ||= lambda { should.flunk "not implemented" }
       Counter[:specifications] += 1
       run_requirement description, block
-    end
-
-    def run_requirement(description, spec)
-      Bacon.handle_requirement description do
-        begin
-          Counter[:depth] += 1
-          rescued = false
-          begin
-            prev_req = nil
-            
-            execute_spec do
-              @before.each { |block| instance_eval(&block) }
-              prev_req = Counter[:requirements]
-              instance_eval(&spec)
-            end
-          rescue Object => e
-            rescued = true
-            raise e
-          ensure
-            if Counter[:requirements] == prev_req and not rescued
-              raise Error.new(:missing,
-                              "empty specification: #{@name} #{description}")
-            end
-            begin
-              @after.each { |block| instance_eval(&block) }
-            rescue Object => e
-              raise e  unless rescued
-            end
-          end
-        rescue Object => e
-          ErrorLog << "#{e.class}: #{e.message}\n"
-          
-          backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
-          backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
-          
-          backtrace.each_with_index do |line, i|
-            ErrorLog << "  #{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
-          end
-          
-          ErrorLog << "\n"
-
-          if e.kind_of? Error
-            Counter[e.count_as] += 1
-            e.count_as.to_s.upcase
-            [:failed]
-          else
-            Counter[:errors] += 1
-            [:error, e]
-          end
-        else
-          ""
-        ensure
-          Counter[:depth] -= 1
-        end
-      end
     end
 
     def raise?(*args, &block); block.raise?(*args); end

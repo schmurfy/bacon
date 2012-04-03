@@ -1,4 +1,5 @@
 
+require 'fiber'
 require 'eventmachine'
 
 #
@@ -18,19 +19,17 @@ module Bacon
   module EMSpec # :nodoc:
 
     def wait(timeout = 0.1, &block)
-      @timeout_interval = timeout
-      @end_check = block
+      waiting_fiber = Fiber.current
+      EM::cancel_timer(@timeout)
+      @timeout = EM::add_timer(timeout){ waiting_fiber.resume }
+      Fiber.yield
+      
+      block.call if block
     end
-    
     
     def done
-      @end_check.call if @end_check
       EM.cancel_timer(@timeout)
       EM.stop
-    end
-
-    def create_timeout_timer(delay = 0.1)
-      EM::add_timer(delay){ done }
     end
 
     def describe(*, &block)
@@ -40,25 +39,16 @@ module Bacon
       end
     end
 
-    def execute_spec(&block)
+    def run_requirement(desc, spec)
       raise "block required" unless block
 
-      super do
-        @timeout_interval = nil
+      @timeout_interval = nil
 
-        EM.run do
-          @timeout = create_timeout_timer()
-
-          instance_eval(&block)
-
-          if @timeout_interval
-            EM::cancel_timer(@timeout)
-            @timeout = create_timeout_timer(@timeout_interval)
-          else
-            done
-          end
-
-        end
+      EM.run do
+        Fiber.new do
+          super
+          done
+        end.resume
       end
     end
 
