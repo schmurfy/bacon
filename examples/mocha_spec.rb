@@ -8,7 +8,7 @@ require 'bacon/ext/mocha'
 Bacon.summary_on_exit
 
 def call_it(target)
-  target.do_something()
+  target.do_something(42)
 end
 
 describe 'MochaSpec' do
@@ -17,7 +17,7 @@ describe 'MochaSpec' do
   end
   
   it 'should call method on mock' do
-    @m.expects(:do_something)
+    @m.expects(:do_something).with(anything())
     call_it(@m)
   end
   
