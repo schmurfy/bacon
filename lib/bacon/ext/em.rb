@@ -31,11 +31,10 @@ module Bacon
       EM.cancel_timer(@timeout)
       EM.stop
     end
-
-    def describe(*, &block)
-      super do
-        with_eventmachine!
-        block.call
+    
+    def create_context(*)
+      super.tap do |obj|
+        obj.send(:with_eventmachine!)
       end
     end
 

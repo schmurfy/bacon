@@ -140,14 +140,8 @@ module Bacon
       end
     end
     
-    def describe(*args, &block)
-      context = Bacon::Context.new(args.join(' '), &block)
-      (parent_context = self).methods(false).each {|e|
-        class<<context; self end.send(:define_method, e) {|*args| parent_context.send(e, *args)}
-      }
-      @before.each { |b| context.before(&b) }
-      @after.each { |b| context.after(&b) }
-      context.run
+    def create_context(name, &block)
+      Bacon::Context.new(name, &block)
     end
   end
   
@@ -184,6 +178,18 @@ module Bacon
       end
     end
     
+    def describe(*args, &block)
+      context = create_context(args.join(' '), &block)
+      
+      # define any user methods in the new context so
+      # that helpers defined in main describe can be used in nested contexts
+      (parent_context = self).methods(false).each {|e|
+        class<<context; self end.send(:define_method, e) {|*args| parent_context.send(e, *args)}
+      }
+      @before.each { |b| context.before(&b) }
+      @after.each { |b| context.after(&b) }
+      context.run
+    end
     
     def focus(spec_str)
       raise "focused test forbidden" unless Bacon::allow_focused_run?
