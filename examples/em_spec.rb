@@ -2,8 +2,8 @@ require 'rubygems'
 
 $LOAD_PATH.unshift << File.expand_path('../../lib/', __FILE__)
 
-require 'bacon/ext/em'
 require 'bacon'
+require 'bacon/ext/em'
 
 Bacon.summary_on_exit
 
@@ -14,10 +14,6 @@ def run_something_later(&block)
 end
 
 describe 'AsynchronousSpec' do  
-  # tell bacon we want to run inside
-  # the EventMachine reactor
-  with_eventmachine!
-  
   before do
     # Eventmachine is running, yeah !
     EM::reactor_running?.should == true
@@ -46,6 +42,15 @@ describe 'AsynchronousSpec' do
     
     # wait 0.2s and then execute the passed block
     wait(0.2){ v.should == 2 }
+  end
+  
+  # if done is called the test ends early
+  # but the block passed to wait is till called
+  should 'end early' do
+    v = 1
+    EM::add_timer(0.2){ v+= 1; done }
+    EM::add_timer(0.3){ v = 3 }
+    wait(1){ v.should == 2 }
   end
   
 end

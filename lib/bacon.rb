@@ -143,6 +143,13 @@ module Bacon
     def create_context(name, &block)
       Bacon::Context.new(name, &block)
     end
+    
+    def run
+      Counter[:context_depth] += 1
+      Bacon.handle_specification(name) { instance_eval(&block) }
+      Counter[:context_depth] -= 1
+      self
+    end
   end
   
   class Context
@@ -154,13 +161,6 @@ module Bacon
       @name = name
       @before, @after = [], []
       @block = block
-    end
-    
-    def run
-      Counter[:context_depth] += 1
-      Bacon.handle_specification(name) { instance_eval(&block) }
-      Counter[:context_depth] -= 1
-      self
     end
 
     def before(&block); @before << block; end

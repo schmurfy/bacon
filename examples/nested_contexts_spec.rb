@@ -9,7 +9,6 @@ Bacon.summary_on_exit
 
 
 describe 'Main context' do
-  with_eventmachine!
   
   before do
     # EM::reactor_running?.should == true

@@ -10,48 +10,40 @@ require 'eventmachine'
 # ever be raised.
 # 
 module Bacon
-  class Context
-    def with_eventmachine!
-      (class << self; self; end).send(:include, EMSpec)
-    end
-  end
-  
   module EMSpec # :nodoc:
 
     def wait(timeout = 0.1, &block)
-      waiting_fiber = Fiber.current
+      @waiting_fiber = Fiber.current
       EM::cancel_timer(@timeout)
-      @timeout = EM::add_timer(timeout){ waiting_fiber.resume }
+      @timeout = EM::add_timer(timeout){ @waiting_fiber.resume }
       Fiber.yield
+      
+      @waiting_fiber = nil
       
       block.call if block
     end
     
     def done
       EM.cancel_timer(@timeout)
-      EM.stop
+      @waiting_fiber.resume if @waiting_fiber
     end
     
-    def create_context(*)
-      super.tap do |obj|
-        obj.send(:with_eventmachine!)
-      end
-    end
-
-    def run_requirement(desc, spec)
-      raise "block required" unless block
-
-      @timeout_interval = nil
-
-      EM.run do
-        Fiber.new do
-          super
-          done
-        end.resume
+    def run(*)
+      subcontext =  EM::reactor_running?
+      if subcontext
+        super
+      else
+        EM::run do
+          Fiber.new do
+            super
+            EM::stop_event_loop
+          end.resume
+        end
+        
       end
     end
 
   end
   
-  
+  Context.send(:include, EMSpec)
 end
