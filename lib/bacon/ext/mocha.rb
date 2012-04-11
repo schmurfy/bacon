@@ -7,6 +7,17 @@ require 'mocha'
 # containing only mocha expectations.
 # 
 module Bacon
+  class Context
+    def freeze_time(t = Time.now)
+      Time.stubs(:now).returns(t)
+      if block_given?
+        yield
+        Time.unstub(:now)
+      end
+    end
+    
+  end
+  
   module MochaRequirementsCounter
     def self.increment
       Counter[:requirements] += 1
