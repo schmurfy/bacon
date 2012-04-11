@@ -32,13 +32,26 @@ module BetterOutput
     
   end
 
-  def handle_summary
+  def handle_summary(started_at)
+    elapsed_time = Time.now.to_i - started_at.to_i
     print ErrorLog  if Backtraces
+    puts "Execution time: #{human_duration(elapsed_time)}"
     puts "%d specifications (%d requirements), %d failures, %d errors" %
       Counter.values_at(:specifications, :requirements, :failed, :errors)
   end
 
   def spaces(str = " ")
     str * 2 * (Counter[:context_depth] - 1)
+  end
+
+private
+  
+  def human_duration(secs)
+    [[60, 'seconds'], [60, 'minutes'], [24, 'hours'], [1000, 'days']].map do |count, name|
+      if secs > 0
+        secs, n = secs.divmod(count)
+        (n > 0) ? "#{n.to_i} #{name}" : nil
+      end
+    end.compact.reverse.join(' ')
   end
 end

@@ -13,7 +13,7 @@ module TapOutput
     end
   end
 
-  def handle_summary
+  def handle_summary(started_at)
     puts "1..#{Counter[:specifications]}"
     puts "# %d tests, %d assertions, %d failures, %d errors" %
       Counter.values_at(:specifications, :requirements, :failed, :errors)

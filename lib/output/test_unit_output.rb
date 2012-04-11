@@ -10,7 +10,7 @@ module TestUnitOutput
     end
   end
 
-  def handle_summary
+  def handle_summary(started_at)
     puts "", "Finished in #{Time.now - @timer} seconds."
     puts ErrorLog  if Backtraces
     puts "%d tests, %d assertions, %d failures, %d errors" %

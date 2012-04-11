@@ -12,5 +12,5 @@ module KnockOutput
     end
   end
 
-  def handle_summary;  end
+  def handle_summary(started_at);  end
 end
