@@ -18,7 +18,6 @@ http://github.com/chneukirchen/bacon
   s.bindir          = 'bin'
   s.executables     << 'bacon'
   s.require_path    = 'lib'
-  s.extra_rdoc_files = ['README']
   s.test_files      = []
   
   s.add_dependency 'term-ansicolor'
