@@ -11,7 +11,9 @@ require 'eventmachine'
 # 
 module Bacon
   module EMSpec # :nodoc:
-
+    class << self
+      attr_accessor :context_fiber
+    end
     def wait(timeout = 0.1, &block)
       @waiting_fiber = Fiber.current
       EM::cancel_timer(@timeout)
@@ -29,15 +31,21 @@ module Bacon
     end
     
     def run(*)
-      subcontext =  EM::reactor_running?
-      if subcontext
+      if EMSpec.context_fiber == Fiber.current
         super
       else
         EM::run do
-          Fiber.new do
-            super
-            EM::stop_event_loop
-          end.resume
+          
+          EMSpec.context_fiber = Fiber.new do
+            begin
+              super
+              EM::stop_event_loop
+            ensure
+              EMSpec.context_fiber = nil
+            end
+          end
+          
+          EMSpec.context_fiber.resume
         end
         
       end
