@@ -14,10 +14,22 @@ module Bacon
     class << self
       attr_accessor :context_fiber
     end
+    
+    def wakeup
+      # this should be enough but for some reason the reactor
+      # idles for 20 seconds on EM::stop before really exiting
+      # @waiting_fiber.resume
+      
+      if @waiting_fiber
+        EM::next_tick { @waiting_fiber.resume }
+      end
+    end
+    
     def wait(timeout = 0.1, &block)
       @waiting_fiber = Fiber.current
       EM::cancel_timer(@timeout)
-      @timeout = EM::add_timer(timeout){ @waiting_fiber.resume }
+      EM::add_timer(timeout, &method(:wakeup))
+      
       Fiber.yield
       
       @waiting_fiber = nil
@@ -27,7 +39,7 @@ module Bacon
     
     def done
       EM.cancel_timer(@timeout)
-      @waiting_fiber.resume if @waiting_fiber
+      wakeup
     end
     
     def run(*)
