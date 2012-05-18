@@ -28,7 +28,7 @@ module Bacon
     def wait(timeout = 0.1, &block)
       @waiting_fiber = Fiber.current
       EM::cancel_timer(@timeout)
-      EM::add_timer(timeout, &method(:wakeup))
+      @timeout = EM::add_timer(timeout, &method(:wakeup))
       
       Fiber.yield
       
