@@ -81,6 +81,28 @@ module Bacon
     end
   end
   
+  def self.store_error(e, description)
+    ErrorLog << "#{e.class}: #{e.message}\n"
+    
+    backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
+    backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
+    
+    backtrace.each_with_index do |line, i|
+      ErrorLog << "  #{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
+    end
+    
+    ErrorLog << "\n"
+
+    if e.kind_of? Error
+      Counter[e.count_as] += 1
+      e.count_as.to_s.upcase
+      [:failed]
+    else
+      Counter[:errors] += 1
+      [:error, e]
+    end
+  end
+  
   module ContextAssertions
     def execute_spec(&block)
       block.call
@@ -113,25 +135,7 @@ module Bacon
             end
           end
         rescue Object => e
-          ErrorLog << "#{e.class}: #{e.message}\n"
-          
-          backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
-          backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
-          
-          backtrace.each_with_index do |line, i|
-            ErrorLog << "  #{line}#{i==0 ? ": #@name - #{description}" : ""}\n"
-          end
-          
-          ErrorLog << "\n"
-
-          if e.kind_of? Error
-            Counter[e.count_as] += 1
-            e.count_as.to_s.upcase
-            [:failed]
-          else
-            Counter[:errors] += 1
-            [:error, e]
-          end
+          Bacon.store_error(e, description)
         else
           ""
         ensure

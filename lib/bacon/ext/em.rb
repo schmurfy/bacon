@@ -47,6 +47,9 @@ module Bacon
         super
       else
         EM::run do
+          EM::error_handler do |err|
+            ::Bacon::store_error(err, "(EM Loop)")
+          end
           
           EMSpec.context_fiber = Fiber.new do
             begin
