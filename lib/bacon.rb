@@ -333,8 +333,14 @@ class Should
     name = "#{name}?"  if name.to_s =~ /\w[^?]\z/
 
     desc = @negated ? "not " : ""
-    desc << @object.inspect << "." << name.to_s
-    desc << "(" << args.map{|x|x.inspect}.join(", ") << ") failed"
+    if (name == :'==') || (name == :'!=')
+      desc << "#{name}\n"
+      desc << "#{@object.inspect}\n"
+      desc << "#{args[0].inspect}"
+    else
+      desc << @object.inspect << "." << name.to_s
+      desc << "(" << args.map{|x|x.inspect}.join(", ") << ") failed"
+    end
 
     satisfy(desc) { |x| x.__send__(name, *args, &block) }
   end
