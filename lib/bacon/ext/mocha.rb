@@ -12,8 +12,11 @@ module Bacon
     def freeze_time(t = Time.now)
       Time.stubs(:now).returns(t)
       if block_given?
-        yield
-        Time.unstub(:now)
+        begin
+          yield
+        ensure
+          Time.unstub(:now)
+        end
       end
     end
     
