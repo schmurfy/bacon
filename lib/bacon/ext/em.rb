@@ -42,6 +42,10 @@ module Bacon
       wakeup
     end
     
+    def new_fiber(&block)
+      Fiber.new(&block)
+    end
+    
     def run(*)
       if EMSpec.context_fiber == Fiber.current
         super
@@ -51,7 +55,8 @@ module Bacon
             ::Bacon::store_error(err, "(EM Loop)")
           end
           
-          EMSpec.context_fiber = Fiber.new do
+          new_fiber do
+            EMSpec.context_fiber = Fiber.current
             begin
               super
               EM::stop_event_loop
@@ -60,7 +65,6 @@ module Bacon
             end
           end
           
-          EMSpec.context_fiber.resume
         end
         
       end
