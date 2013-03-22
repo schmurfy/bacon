@@ -8,16 +8,20 @@ require 'mocha'
 # containing only mocha expectations.
 # 
 module Bacon
-  class Context
-    def freeze_time(t = Time.now)
-      Time.stubs(:now).returns(t)
-      if block_given?
-        begin
-          yield
-        ensure
-          Time.unstub(:now)
-        end
+  def self.freeze_time(t = Time.now)
+    Time.stubs(:now).returns(t)
+    if block_given?
+      begin
+        yield
+      ensure
+        Time.unstub(:now)
       end
+    end
+  end
+  
+  class Context
+    def freeze_time(*args, &block)
+      Bacon.freeze_time(*args, &block)
     end
     
   end
