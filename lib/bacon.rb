@@ -157,14 +157,15 @@ module Bacon
   end
   
   class Context
-    attr_reader :name, :block
+    attr_reader :name, :block, :toplevel
     
     include ContextAssertions
     
-    def initialize(name, &block)
+    def initialize(name, toplevel = false, &block)
       @name = name
       @before, @after = [], []
       @block = block
+      @toplevel = toplevel
     end
 
     def before(&block); @before << block; end
@@ -274,7 +275,7 @@ module Kernel
   def describe(*args, &block)
     Bacon::focus_name_regexp = //
     Bacon::focus_context_regexp = //
-    Bacon::Context.new(args.join(' '), &block).run
+    Bacon::Context.new(args.join(' '), true, &block).run
   end
   
   def shared(name, &block)    Bacon::Shared[name] = block                     end
