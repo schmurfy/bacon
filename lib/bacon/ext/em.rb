@@ -43,7 +43,7 @@ module Bacon
     end
     
     def new_fiber(&block)
-      Fiber.new(&block)
+      Fiber.new(&block).resume
     end
     
     def run(*)
