@@ -134,6 +134,9 @@ module Bacon
               raise e  unless rescued
             end
           end
+        rescue Interrupt
+          raise
+          
         rescue Object => e
           Bacon.store_error(e, description)
         else
