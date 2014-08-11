@@ -10,8 +10,8 @@ require 'em-synchrony/em-http'
 module Bacon
   module HTTPHelpers
     def start_server(rack_app = nil, &block)
-      @http_port ||= 11000
-      @http_port+= 1
+      $bacon_http_port ||= 11000
+      $bacon_http_port+= 1
       
       if rack_app && rack_app.respond_to?(:call)
         block = proc{
@@ -20,7 +20,7 @@ module Bacon
       end
       
       Thin::Logging.silent = true
-      Thin::Server.start('127.0.0.1', @http_port, &block)
+      Thin::Server.start('127.0.0.1', $bacon_http_port, &block)
     end
     
     def http_request(method, path, args = {}, &block)
@@ -30,7 +30,7 @@ module Bacon
       
       request_data = {:path => path, :query => params, :head => headers, :body => body}
       
-      req = EM::HttpRequest.new("http://127.0.0.1:#{@http_port}#{path}").send(method, request_data)
+      req = EM::HttpRequest.new("http://127.0.0.1:#{$bacon_http_port}#{path}").send(method, request_data)
       req.callback(&block)
       req
     end
