@@ -7,6 +7,8 @@
 # Bacon is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+require 'hitimes'
+
 module Bacon    
   Counter = Hash.new(0)
   ErrorLog = ""
@@ -109,17 +111,19 @@ module Bacon
     end
     
     def run_requirement(description, spec)
-      Bacon.handle_requirement description do
+      Bacon.handle_requirement description do |timing|
         begin
           Counter[:depth] += 1
           rescued = false
           begin
             prev_req = nil
             
-            execute_spec do
-              @before.each { |block| instance_eval(&block) }
-              prev_req = Counter[:requirements]
-              instance_eval(&spec)
+            timing << Hitimes::Interval.measure do
+              execute_spec do
+                @before.each { |block| instance_eval(&block) }
+                prev_req = Counter[:requirements]
+                instance_eval(&spec)
+              end
             end
           rescue Object => e
             rescued = true

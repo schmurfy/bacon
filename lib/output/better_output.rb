@@ -13,14 +13,16 @@ module BetterOutput
 
   def handle_requirement(description)
     print "#{spaces} ~ #{description}"
-    error_type, err = yield
+    timing = []
+    error_type, err = yield(timing)
     
     # goto beginning of line
     print "\e[G\e[K"
     
     case error_type
     when ""
-      puts "#{spaces} #{Color.green}✔#{Color.reset} #{description}"
+      duration = (timing[0] * 1000).to_i
+      puts "#{spaces} #{Color.green}✔#{Color.reset} #{description} [#{duration} ms]"
       
     when :failed
       puts "#{spaces} #{Color.red}✘#{Color.reset} #{description}"

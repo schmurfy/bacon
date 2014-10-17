@@ -21,6 +21,7 @@ http://github.com/chneukirchen/bacon
   s.test_files      = []
   
   s.add_dependency 'term-ansicolor'
+  s.add_dependency 'hitimes', '~> 1.2.2'
   
   
   s.author          = 'Christian Neukirchen'
