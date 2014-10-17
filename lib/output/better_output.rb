@@ -21,8 +21,11 @@ module BetterOutput
     
     case error_type
     when ""
-      duration = (timing[0] * 1000).to_i
-      puts "#{spaces} #{Color.green}✔#{Color.reset} #{description} [#{duration} ms]"
+      before_duration = (timing[0] * 1000).to_i
+      test_duration = (timing[1] * 1000).to_i
+      total = (timing.inject(:+) * 1000 ).to_i
+      
+      puts "#{spaces} #{Color.green}✔#{Color.reset} #{description} [#{total} ms (#{before_duration} + #{test_duration})]"
       
     when :failed
       puts "#{spaces} #{Color.red}✘#{Color.reset} #{description}"

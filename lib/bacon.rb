@@ -118,9 +118,12 @@ module Bacon
           begin
             prev_req = nil
             
-            timing << Hitimes::Interval.measure do
-              execute_spec do
+            execute_spec do
+              timing << Hitimes::Interval.measure do
                 @before.each { |block| instance_eval(&block) }
+              end
+              
+              timing << Hitimes::Interval.measure do
                 prev_req = Counter[:requirements]
                 instance_eval(&spec)
               end
