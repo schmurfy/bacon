@@ -7,7 +7,8 @@ module SpecDoxOutput
 
   def handle_requirement(description)
     print "#{spaces}  - #{description}"
-    error = yield
+    timing = []
+    error = yield(timing)
     puts error.empty? ? "" : " [#{error}]"
   end
 
