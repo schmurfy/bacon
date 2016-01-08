@@ -1,6 +1,6 @@
 
-gem 'mocha', '~> 0.10.0'
-require 'mocha'
+gem 'mocha', '~> 1.1.0'
+require 'mocha/api'
 
 #
 # This extension ensure that mocha expectations are considered
