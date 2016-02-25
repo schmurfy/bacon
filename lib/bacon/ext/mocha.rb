@@ -43,8 +43,6 @@ module Bacon
           mocha_setup
           block.call
           mocha_verify(MochaRequirementsCounter)
-        rescue Mocha::ExpectationError => e
-          raise Error.new(:failed, "#{e.message}\n#{e.backtrace[0...10].join("\n")}")
         ensure
           mocha_teardown
         end
