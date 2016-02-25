@@ -38,10 +38,13 @@ module BetterOutput
     
   end
 
-  def handle_summary(started_at)
-    elapsed_time = Time.now.to_i - started_at.to_i
+  def handle_summary(elapsed_time)
     print ErrorLog  if Backtraces
-    puts "Execution time: #{human_duration(elapsed_time)}"
+    if elapsed_time < 1
+      puts "Execution time: #{elapsed_time * 1000} ms"
+    else
+      puts "Execution time: #{human_duration(elapsed_time)}"
+    end
     puts "%d specifications (%d requirements), %d failures, %d errors" %
       Counter.values_at(:specifications, :requirements, :failed, :errors)
   end

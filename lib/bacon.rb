@@ -61,9 +61,10 @@ module Bacon
   
   def self.summary_on_exit
     return  if Counter[:installed_summary] > 0
-    started_at = Time.now
+    interval = Hitimes::Interval.new
+    interval.start()
     at_exit {
-      handle_summary(started_at)
+      handle_summary(interval.stop())
       if $!
         raise $!
       elsif Counter[:errors] + Counter[:failed] > 0
