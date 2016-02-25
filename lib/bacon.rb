@@ -186,11 +186,11 @@ module Bacon
       names.each { |name| instance_eval(&Shared[name]) }
     end
     
-    def should(*args, &block)
+    def should(label, *args, &block)
       if Counter[:depth]==0
-        it('should '+args.first,&block)
+        it("should #{label}",&block)
       else
-        super(*args,&block)
+        super(label, *args,&block)
       end
     end
     
