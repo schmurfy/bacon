@@ -87,7 +87,7 @@ module Bacon
   def self.store_error(e, description)
     ErrorLog << "#{e.class}: #{e.message}\n"
     
-    backtrace = e.backtrace.find_all { |line| line !~ /bin\/bacon|\/bacon\.rb:\d+/ && line !~ /guard|fsevent|thor/ }
+    backtrace = e.backtrace.find_all { |line| line !~ /guard|fsevent|thor|bacon/ }
     backtrace = backtrace[0, Bacon.backtrace_size] if Bacon.backtrace_size
     
     backtrace.each_with_index do |line, i|
