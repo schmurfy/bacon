@@ -142,7 +142,7 @@ module Bacon
               raise e  unless rescued
             end
           end
-        rescue Interrupt
+        rescue Interrupt, SystemExit
           raise
           
         rescue Object => e
