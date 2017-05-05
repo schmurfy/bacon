@@ -1,5 +1,5 @@
 
-gem 'em-http-request', '~> 1.0.0'
+gem 'em-http-request', '~> 1.0'
 gem 'thin'
 require 'em-http-request'
 require 'thin'
