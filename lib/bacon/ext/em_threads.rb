@@ -1,18 +1,21 @@
 module Bacon
   module Threaded
+    class << self
+      attr_accessor :context_thread
+    end
 
     def run(*)
-      if Thread.main == Thread.current
-        EM.next_tick do
-          Thread.new do
-            sleep(0.1)
+      if Threaded.context_thread == Thread.current
+        super
+      else
+        EM.run do
+          EM.defer do
+            Threaded.context_thread = Thread.current
             super
             EM::stop_event_loop()
           end
 
         end
-      else
-        super
       end
     end
 
