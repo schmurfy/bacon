@@ -11,8 +11,11 @@ module Bacon
         EM.run do
           EM.defer do
             Threaded.context_thread = Thread.current
-            super
-            EM::stop_event_loop()
+            begin
+              super
+            ensure
+              EM::stop_event_loop()
+            end
           end
 
         end
