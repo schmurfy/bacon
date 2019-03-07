@@ -1,14 +1,13 @@
 
-gem 'em-http-request', '~> 1.0'
+gem 'em-http-request'
 gem 'thin'
 require 'em-http-request'
 require 'thin'
 
-require 'em-synchrony'
-require 'em-synchrony/em-http'
-
 module Bacon
   module HTTPHelpers
+    @@servers = []
+    
     def start_server(rack_app = nil, &block)
       $bacon_http_port ||= 11000
       $bacon_http_port+= 1
@@ -20,7 +19,20 @@ module Bacon
       end
       
       Thin::Logging.silent = true
-      Thin::Server.start('127.0.0.1', $bacon_http_port, &block)
+      
+      server = Thin::Server.new('127.0.0.1', $bacon_http_port, &block)
+      server.start
+      
+      @@servers << server
+    end
+    
+    def stop_servers()
+      @@servers.each{|s| s.stop() }
+      @@servers = []
+    end
+    
+    def http_url(path)
+      "http://127.0.0.1:#{$bacon_http_port}#{path}"
     end
     
     def http_request(method, path, args = {}, &block)
