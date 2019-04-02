@@ -20,7 +20,7 @@ module Bacon
       
       Thin::Logging.silent = true
       
-      server = Thin::Server.new('127.0.0.1', $bacon_http_port, &block)
+      server = Thin::Server.new('127.0.0.1', $bacon_http_port, signals: false, &block)
       server.start
       
       @@servers << server
